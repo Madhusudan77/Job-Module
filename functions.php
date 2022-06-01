@@ -64,6 +64,26 @@ function ajax_contact_us(){
         "name" => $arr['name'],
         "email" => $arr['email'],
         "phone" => $arr['phone'],
+        "address" => $arr['address']
+    ]);
+    if($result>0){
+        wp_send_json_success("Data inserted");
+    }else{
+        wp_send_json_error("Please try again");
+    }
+}
+
+add_action('wp_ajax_contact_us_contractor', 'ajax_contact_us_contractor');
+function ajax_contact_us_contractor(){
+    $arr=[];
+    wp_parse_str($_POST['contact_us_contractor'],$arr);
+    global $wpdb;
+    global $table_prefix;
+    $table = $table_prefix.'contact_us_contractor';
+    $result = $wpdb->insert($table,[
+        "name" => $arr['name'],
+        "email" => $arr['email'],
+        "phone" => $arr['phone'],
         "address" => $arr['address'],
         "bname" => $arr['bname'],
         "bnumber" => $arr['bnumber']
@@ -73,4 +93,21 @@ function ajax_contact_us(){
     }else{
         wp_send_json_error("Please try again");
     }
+}
+
+
+
+add_action( 'init', 'job_module' );
+function job_module ()
+{
+    register_post_type( 'jobs',
+        array(
+            'labels' => array(
+                'name' => __( 'Jobs' ),
+                'singular_name' => __( 'Job' )
+            ),
+        'public' => true,
+        'supports' => array ('title', 'editor', 'thumbnail')
+        )
+    );
 }
