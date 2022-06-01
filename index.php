@@ -1,32 +1,6 @@
 <?php get_header(); ?>
 
 
-<?php 
-$postTitle = $_POST['name'];
-$post = $_POST['address'];
-$submit = $_POST['submit'];
-
-if(isset($submit)){
-
-    global $user_ID;
-
-    $new_post = array(
-        'post_title' => $postTitle,
-        'post_content' => $post,
-        'post_status' => 'publish',
-        'post_date' => date('Y-m-d H:i:s'),
-        'post_author' => $user_ID,
-        'post_type' => 'jobs',
-        'post_category' => array(0)
-    );
-
-    wp_insert_post($new_post);
-
-}
-
-?>
-
-
 <div class="container">
 	<div class="service_class">
 		<div class="header_class">
@@ -155,6 +129,33 @@ if(isset($submit)){
 			});
 		});
 	});
+
+
+	jQuery(document).ready(function(){
+		jQuery('#frmContactUs').submit(function(){
+			event.preventDefault();
+			jQuery('#result_msg_client').html('');
+			var link = "<?php echo admin_url('admin-ajax.php') ?>";
+			var form = jQuery('#clientform').serialize();
+			var formData = new FormData;
+			formData.append('action', 'contact_us_post_submit');
+			formData.append('contact_us_post_submit', form);
+			jQuery.ajax({
+				url:link,
+				data:formData,
+				processData:false,
+				contentType:false,
+				type:'post',
+				success:function(result){
+					if(result.success==true){
+						jQuery('#clientform')[0].reset();
+					}
+					jQuery('#result_msg_client').html('<h3><span class="'+result.success+'">'+result.data+'</span></h3>')
+				}
+			});
+		});
+	});
+
 </script>
 
 <?php get_footer(); ?>
