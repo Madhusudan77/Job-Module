@@ -53,67 +53,55 @@ $result = add_role( 'contractor', __('Contractor' ), array(
 ) );
 
 
-add_action('wp_ajax_contact_us', 'ajax_contact_us');
-function ajax_contact_us(){
-    $arr=[];
-    wp_parse_str($_POST['contact_us'],$arr);
-    global $wpdb;
-    global $table_prefix;
-    $table = $table_prefix.'contact_us';
-    $result = $wpdb->insert($table,[
-        "name" => $arr['name'],
-        "email" => $arr['email'],
-        "phone" => $arr['phone'],
-        "address" => $arr['address']
-    ]);
-    if($result>0){
-        wp_send_json_success("Data inserted");
-    }else{
-        wp_send_json_error("Please try again");
-    }
-}
-
-add_action('wp_ajax_contact_us_contractor', 'ajax_contact_us_contractor');
-function ajax_contact_us_contractor(){
-    $arr=[];
-    wp_parse_str($_POST['contact_us_contractor'],$arr);
-    global $wpdb;
-    global $table_prefix;
-    $table = $table_prefix.'contact_us_contractor';
-    $result = $wpdb->insert($table,[
-        "name" => $arr['name'],
-        "email" => $arr['email'],
-        "phone" => $arr['phone'],
-        "address" => $arr['address'],
-        "bname" => $arr['bname'],
-        "bnumber" => $arr['bnumber']
-    ]);
-    if($result>0){
-        wp_send_json_success("Data inserted");
-    }else{
-        wp_send_json_error("Please try again");
-    }
-}
 
 
-// add_action('wp_ajax_contact_us_post_submit', 'ajax_contact_us_post_submit');
-// function ajax_contact_us_post_submit(){
-//     wp_parse_str($_POST['contact_us_post_submit'],$arr);
-//     $name = $_POST['name'];
-//     $email = $_POST['email'];
-//     $phone = $_POST['phone'];
-//     $address = $_POST['address'];
-//     $bname = $_POST['bname'];
-//     $bnumber = $_POST['bnumber'];
-//     $cptarr = array(
-//         "post_status"=>"published",
-//         "post_type"=>"jobs",
-//     );
-//     $post_data=wp_insert_post($cptarr);
+// //saving form data into database client
+// add_action('wp_ajax_contact_us', 'ajax_contact_us');
+// function ajax_contact_us(){
+//     $arr=[];
+//     wp_parse_str($_POST['contact_us'],$arr);
+//     global $wpdb;
+//     global $table_prefix;
+//     $table = $table_prefix.'contact_us';
+//     $result = $wpdb->insert($table,[
+//         "name" => $arr['name'],
+//         "email" => $arr['email'],
+//         "phone" => $arr['phone'],
+//         "address" => $arr['address']
+//     ]);
+//     if($result>0){
+//         wp_send_json_success("Data inserted");
+//     }else{
+//         wp_send_json_error("Please try again");
+//     }
 // }
 
 
+// //saving form data into database contractor
+// add_action('wp_ajax_contact_us_contractor', 'ajax_contact_us_contractor');
+// function ajax_contact_us_contractor(){
+//     $arr=[];
+//     wp_parse_str($_POST['contact_us_contractor'],$arr);
+//     global $wpdb;
+//     global $table_prefix;
+//     $table = $table_prefix.'contact_us_contractor';
+//     $result = $wpdb->insert($table,[
+//         "name" => $arr['name'],
+//         "email" => $arr['email'],
+//         "phone" => $arr['phone'],
+//         "address" => $arr['address'],
+//         "bname" => $arr['bname'],
+//         "bnumber" => $arr['bnumber']
+//     ]);
+//     if($result>0){
+//         wp_send_json_success("Data inserted");
+//     }else{
+//         wp_send_json_error("Please try again");
+//     }
+// }
 
+
+//custom post type job module
 add_action( 'init', 'job_module' );
 function job_module ()
 {
@@ -130,78 +118,184 @@ function job_module ()
 }
 
 
-function add_your_fields_meta_box() {
-        add_meta_box('your_fields_meta_box', 'Your Fields', 'show_your_fields_meta_box', 'jobs', 'normal', 'high' );
+// add_action('wp_ajax_contact_us_post_submit', 'ajax_contact_us_post_submit');
+// function ajax_contact_us_post_submit(){
+//     $arr=[];
+//     wp_parse_str($_POST['contact_us_post_submit'],$arr);
+//     $name = $_POST['name'];
+//     $email = $_POST['email'];
+//     $phone = $_POST['phone'];
+//     $address = $_POST['address'];
+//     $bname = $_POST['bname'];
+//     $bnumber = $_POST['bnumber'];
+//     $post_data = array(
+//         'post_title'    => $_POST['post_title'],
+//         'post_type'     => 'jobs',
+//         'post_status'   => 'publish'
+//     );
+//     $post_id = wp_insert_post( $post_data );
+
+
+//     $field_key = "email";
+//     $value = $email;
+//     update_field( $field_key, $value, $post_id );
+
+//     $field_key = "phone_no";
+//     $value = $phone;
+//     update_field( $field_key, $value, $post_id );
+
+//     $field_key = "business_name";
+//     $value = $bname;
+//     update_field( $field_key, $value, $post_id );
+
+//     $field_key = "business_number";
+//     $value = $bnumber;
+//     update_field( $field_key, $value, $post_id );
+// }
+
+
+
+//login form
+function ajax_login_init(){
+
+    wp_register_script('ajax-login-script', get_stylesheet_directory_uri() . '/ajax-login-script.js', array('jquery') ); 
+    wp_enqueue_script('ajax-login-script');
+
+    wp_localize_script( 'ajax-login-script', 'ajax_login_object', array( 
+        'ajaxurl' => admin_url( 'admin-ajax.php' ),
+        'redirecturl' => home_url(),
+        'loadingmessage' => __('Sending user info, please wait...')
+    ));
+
+    // Enable the user with no privileges to run ajax_login() in AJAX
+    add_action( 'wp_ajax_nopriv_ajaxlogin', 'ajax_login' );
+}
+
+// Execute the action only if the user isn't logged in
+if (!is_user_logged_in()) {
+    add_action('init', 'ajax_login_init');
+}
+
+
+//ajax call
+function ajax_login(){
+
+    // First check the nonce, if it fails the function will break
+    check_ajax_referer( 'ajax-login-nonce', 'security' );
+
+    // Nonce is checked, get the POST data and sign user on
+    $info = array();
+    $info['user_login'] = $_POST['username'];
+    $info['user_password'] = $_POST['password'];
+    $info['remember'] = true;
+
+    $user_signon = wp_signon( $info, false );
+    if ( is_wp_error($user_signon) ){
+        echo json_encode(array('loggedin'=>false, 'message'=>__('Wrong username or password.')));
+    } else {
+        echo json_encode(array('loggedin'=>true, 'message'=>__('Login successful, redirecting...')));
     }
-add_action( 'add_meta_boxes', 'add_your_fields_meta_box' );
+
+    die();
+}
 
 
-function show_your_fields_meta_box() {
-        global $post;
-            $meta = get_post_meta( $post->ID, 'your_fields', true ); ?>
 
-        <input type="hidden" name="your_meta_box_nonce" value="<?php echo wp_create_nonce( basename(__FILE__) ); ?>">
+// registration form
+function vb_registration_form() { ?>
+ 
+<div class="vb-registration-form">
+  <form class="form-horizontal registraion-form" role="form">
+ 
+    <div class="form-group">
+      <label for="vb_name" class="sr-only">Your Name</label>
+      <input type="text" name="vb_name" id="vb_name" value="" placeholder="Your Name" class="form-control" />
+    </div>
+ 
+    <div class="form-group">
+      <label for="vb_email" class="sr-only">Your Email</label>
+      <input type="email" name="vb_email" id="vb_email" value="" placeholder="Your Email" class="form-control" />
+    </div>
+ 
+    <div class="form-group">
+      <label for="vb_nick" class="sr-only">Your Nickname</label>
+      <input type="text" name="vb_nick" id="vb_nick" value="" placeholder="Your Nickname" class="form-control" />
+    </div>
+ 
+    <div class="form-group">
+      <label for="vb_username" class="sr-only">Choose Username</label>
+      <input type="text" name="vb_username" id="vb_username" value="" placeholder="Choose Username" class="form-control" />
+      <span class="help-block">Please use only a-z,A-Z,0-9,dash and underscores, minimum 5 characters</span>
+    </div>
+ 
+    <div class="form-group">
+      <label for="vb_pass" class="sr-only">Choose Password</label>
+      <input type="password" name="vb_pass" id="vb_pass" value="" placeholder="Choose Password" class="form-control" />
+      <span class="help-block">Minimum 8 characters</span>
+    </div>
+ 
+    <?php wp_nonce_field('vb_new_user','vb_new_user_nonce', true, true ); ?>
+ 
+    <input type="submit" class="btn btn-primary" id="btn-new-user" value="Register" />
+  </form>
+ 
+    <div class="indicator">Please wait...</div>
+    <div class="alert result-message"></div>
+</div>
+ 
+<?php
+}
+add_shortcode('vb_registration_form', 'vb_registration_form');
 
-        <p>
-            <label for="your_fields[name]">Name</label>
-            <br>
-            <input type="text" name="your_fields[name]" id="your_fields[name]" class="regular-text" value="<?php echo $meta['name']; ?>">
-        </p>
-        <p>
-            <label for="your_fields[email]">Email</label>
-            <br>
-            <input type="email" name="your_fields[email]" id="your_fields[email]" class="regular-text" value="<?php echo $meta['email']; ?>">
-        </p>
-        <p>
-            <label for="your_fields[phoneno]">Phone number</label>
-            <br>
-            <input type="tel" name="your_fields[phoneno]" id="your_fields[phoneno]" class="regular-text" value="<?php echo $meta['phoneno']; ?>">
-        </p>
-        <p>
-            <label for="your_fields[textarea]">Address</label>
-            <br>
-            <textarea name="your_fields[textarea]" id="your_fields[textarea]" rows="5" cols="30" style="width:500px;"><?php echo $meta['textarea']; ?></textarea>
-        </p>
-        <p>
-            <label for="your_fields[bname]">Business Name</label>
-            <br>
-            <input type="text" name="your_fields[bname]" id="your_fields[bname]" class="regular-text" value="<?php echo $meta['bname']; ?>">
-        </p>
-        <p>
-            <label for="your_fields[bno]">Business number</label>
-            <br>
-            <input type="tel" name="your_fields[bno]" id="your_fields[bno]" class="regular-text" value="<?php echo $meta['bno']; ?>">
-        </p>
-    
 
- <?php }
+wp_nonce_field('vb_new_user','vb_new_user_nonce', true, true );
 
 
-function save_your_fields_meta( $post_id ) {
-        // verify nonce
-        if ( !wp_verify_nonce( $_POST['your_meta_box_nonce'], basename(__FILE__) ) ) {
-            return $post_id;
-        }
-        // check autosave
-        if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-            return $post_id;
-        }
-        // check permissions
-        if ( 'page' === $_POST['post_type'] ) {
-            if ( !current_user_can( 'edit_page', $post_id ) ) {
-                return $post_id;
-            } elseif ( !current_user_can( 'edit_post', $post_id ) ) {
-                return $post_id;
-            }
-        }
+function vb_register_user_scripts() {
+  // Enqueue script
+  wp_register_script('vb_reg_script', get_stylesheet_directory_uri() . '/ajax-registration.js', array('jquery'), null, false);
+  wp_enqueue_script('vb_reg_script');
+ 
+  wp_localize_script( 'vb_reg_script', 'vb_reg_vars', array(
+        'vb_ajax_url' => admin_url( 'admin-ajax.php' ),
+      )
+  );
+}
+add_action('wp_enqueue_scripts', 'vb_register_user_scripts', 100);
 
-        $old = get_post_meta( $post_id, 'your_fields', true );
-        $new = $_POST['your_fields'];
 
-        if ( $new && $new !== $old ) {
-            update_post_meta( $post_id, 'your_fields', $new );
-        } elseif ( '' === $new && $old ) {
-            delete_post_meta( $post_id, 'your_fields', $old );
-        }
+//New User registration
+function vb_reg_new_user() {
+  // Verify nonce
+  if( !isset( $_POST['nonce'] ) || !wp_verify_nonce( $_POST['nonce'], 'vb_new_user' ) )
+    die( 'Ooops, something went wrong, please try again later.' );
+ 
+  // Post values
+    $username = $_POST['user'];
+    $password = $_POST['pass'];
+    $email    = $_POST['mail'];
+    $name     = $_POST['name'];
+    $nick     = $_POST['nick'];
+
+    $userdata = array(
+        'user_login' => $username,
+        'user_pass'  => $password,
+        'user_email' => $email,
+        'first_name' => $name,
+        'nickname'   => $nick,
+    );
+ 
+    $user_id = wp_insert_user( $userdata ) ;
+ 
+    // Return
+    if( !is_wp_error($user_id) ) {
+        echo '1';
+    } else {
+        echo $user_id->get_error_message();
     }
-    add_action( 'save_post', 'save_your_fields_meta' );
+  die();
+ 
+}
+ 
+add_action('wp_ajax_register_user', 'vb_reg_new_user');
+add_action('wp_ajax_nopriv_register_user', 'vb_reg_new_user');
