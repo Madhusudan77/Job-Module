@@ -1,56 +1,80 @@
 <?php get_header(); ?>
-
-
+<div class="container">
 <?php if (is_user_logged_in()) { ?>
     <a class="login_button" href="<?php echo wp_logout_url( home_url() ); ?>">Logout</a>
 <?php } else { ?>
     <a class="login_button" id="show_login" href="">Login</a>
-<?php } 
+<?php } ?>
+<?php if (!is_user_logged_in()) {?>
 
-if (!is_user_logged_in()) {?>
-	<ul class="nav nav-tabs navigation_tabs">
-		<li class="active"><a data-toggle="tab" href="#home">Contractor</a></li>
-		<li><a data-toggle="tab" href="#menu1">Client</a></li>
-	</ul>
-	<div class="tab-content">
-		<div id="home" class="tab-pane fade in active">
-  			<?php echo do_shortcode('[vb_registration_form]'); ?>  
-    	</div>
-    	<div id="menu1" class="tab-pane fade">
-    		<h3>Client</h3>
-	      	<form id="clientform">
-				<div class="form-group">
-				    <label for="Name">Name</label>
-				    <input type="text" class="form-control" name="name" id="name" placeholder="Name" required/>
-				</div>
-				<div class="form-group">
-				    <label for="Email">Email</label>
-				    <input type="email" class="form-control" name="email" id="email" placeholder="Email" required/>
-				</div>
-				<div class="form-group">
-				    <label for="Phone">Phone No.</label>
-				    <input type="tel" class="form-control" name="phone" id="phone" placeholder="Phone" required/>
-				</div>
-				<div class="form-group">
-				    <label for="Address">Address</label>
-				    <input type="text" class="form-control" name="address" id="address" placeholder="Address" required/>
-				</div>
-				<div class="form-group">
-				    <input type="submit" class="form-control" name="submit" id="submit" placeholder="Submit" >
-				</div>
-				<div id="result_msg_client">
-					
-				</div>
-			</form>
-    	</div>
-    </div>
+	<h2 class="header">Register Yourself As A Client or Contractor:</h2>
+	<ul class="nav nav-tabs">
+    	<li class="active"><a data-toggle="tab" href="#home">Contractor</a></li>
+    	<li><a data-toggle="tab" href="#menu1">Client</a></li>
+  	</ul>
+  	<div class="tab-content">
+  		<div id="home" class="tab-pane fade in active">
+		    <form action="#" id="resgistration_form" method="POST" name="register-form" class="register-form">
+		      	<fieldset>
+					<div class="form-group">
+					    <label for="Name">Name</label>
+					    <input type="text" class="form-control" name="new_user_name" placeholder="Username" id="new-username" required/>
+					</div>
+					<div class="form-group">
+						<label for="Email">Email</label>
+						<input type="email" class="form-control" name="new_user_email" placeholder="Email address" id="new-useremail" required/>
+					</div>
+					<div class="form-group">
+						<label for="Password">Password</label>
+						<input type="password" class="form-control" name="new_user_password" placeholder="Password" id="new-userpassword" required/>
+					</div>
+					<div class="form-group">
+						<label for="RePassword">Re Enter Password</label>
+						<input type="password" class="form-control" name="re-pwd" placeholder="Re-enter Password" id="re-pwd" required/>
+					</div>
+					<div class="form-group">
+						<input type="submit" class="button" id="register-button" value="Register" >
+					</div>
+					<div id="result_msg_client">
+							
+					</div>
+		      </fieldset>
+		    </form>
+		</div>
+		<div id="menu1" class="tab-pane fade">
+			<form action="#" id="resgistration_form_client" method="POST" name="register-form" class="cregister-form">
+		      	<fieldset>
+					<div class="form-group">
+					    <label for="Name">Name</label>
+					    <input type="text" class="form-control" name="new_cuser_name" placeholder="Username" id="new-cusername" required/>
+					</div>
+					<div class="form-group">
+						<label for="Email">Email</label>
+						<input type="email" class="form-control" name="new_cuser_email" placeholder="Email address" id="new-cuseremail" required/>
+					</div>
+					<div class="form-group">
+						<label for="Password">Password</label>
+						<input type="password" class="form-control" name="new_cuser_password" placeholder="Password" id="new-cuserpassword" required/>
+					</div>
+					<div class="form-group">
+						<label for="RePassword">Re Enter Password</label>
+						<input type="password" class="form-control" name="cre-pwd" placeholder="Re-enter Password" id="cre-pwd" required/>
+					</div>
+					<div class="form-group">
+						<input type="submit" class="button" id="register-cbutton" value="Register" >
+					</div>
+					<div id="result_msg_cclient">
+							
+					</div>
+		      </fieldset>
+		    </form>
+		</div>
+	</div>
+		
 <?php }?>
-	
-     
 
-    
-    <!-- login form -->
-	<form id="login" action="login" method="post">
+<?php if (!is_user_logged_in()) {?>
+<form id="login" action="login" method="post">
         <h1>Site Login</h1>
         <p class="status"></p>
         <label for="username">Username</label>
@@ -62,57 +86,116 @@ if (!is_user_logged_in()) {?>
         <a class="close" href="">(close)</a>
         <?php wp_nonce_field( 'ajax-login-nonce', 'security' ); ?>
     </form>
+<?php }?>
 
 
-<!-- ajax for form registration -->
-<script type="text/javascript">
-	jQuery(document).ready(function(){
-		jQuery('#clientform').submit(function(){
-			event.preventDefault();
-			jQuery('#result_msg_client').html('');
-			var link = "<?php echo admin_url('admin-ajax.php') ?>";
-			var form = jQuery('#clientform').serialize();
-			var formData = new FormData;
-			formData.append('action', 'contact_us');
-			formData.append('contact_us', form);
-			jQuery.ajax({
-				url:link,
-				data:formData,
-				processData:false,
-				contentType:false,
-				type:'post',
-				success:function(result){
-					if(result.success==true){
-						jQuery('#clientform')[0].reset();
-					}
-					jQuery('#result_msg_client').html('<h3><span class="'+result.success+'">'+result.data+'</span></h3>')
-				}
-			});
-		});
-	});
 
+</div>
+    <script type="text/javascript">
+    	//for contractor
+     jQuery('#register-cbutton').on('click',function(e){
+        e.preventDefault();
+        var newcUserName = jQuery('#new-cusername').val();
+        var newcUserEmail = jQuery('#new-cuseremail').val();
+        var newcUserPassword = jQuery('#new-cuserpassword').val();
+        var recUserPassword = jQuery('#cre-pwd').val();
+        var cemailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+        var cvalid_email = '';
+        var chasError = false;
+        if(newcUserEmail == '') {
+	      	jQuery('#result_msg_cclient').text('Please enter your email address.').show();
+	      	chasError = true;
+	    }
+	    else if(!cemailReg.test(newcUserEmail)) {
+	      	jQuery('#result_msg_cclient').text('Enter a valid email address.').show();
+	      	chasError = true;
+	    }
+	    else{
+	    	cvalid_email = newcUserEmail;
+	    }
+		if((newcUserName.length>0)&&(cvalid_email.length>0)&&(newcUserPassword.length>0)&&(recUserPassword.length>0)){
+        	if(newcUserPassword==recUserPassword){
+	        	jQuery.ajax({
+	                type:"POST",
+	                url:"<?php echo admin_url('admin-ajax.php'); ?>",
+	                data: {
+	                    action: "register_client_user_front_end",
+	                    new_cuser_name : newcUserName,
+	                    new_cuser_email : cvalid_email,
+	                    new_cuser_password : newcUserPassword
+	                },
+	                success: function(result){
+	                  	if(result.success==true){
+							jQuery('#resgistration_form')[0].reset();
+						}
+						jQuery('#result_msg_cclient').text(result).show();
+	                },
+	                error: function(result) {
+	        			
+	                 	}
+	                });
+	            }
+	            else{
+	            	alert('password does not match');
+	            }
+	        }
+	        else{
+	        	alert('field is required');
+	     	}
+      	});
+
+
+
+     // for client
     jQuery('#register-button').on('click',function(e){
         e.preventDefault();
         var newUserName = jQuery('#new-username').val();
         var newUserEmail = jQuery('#new-useremail').val();
         var newUserPassword = jQuery('#new-userpassword').val();
-        jQuery.ajax({
-          type:"POST",
-          url:"<?php echo admin_url('admin-ajax.php'); ?>",
-          data: {
-            action: "register_user_front_end",
-            new_user_name : newUserName,
-            new_user_email : newUserEmail,
-            new_user_password : newUserPassword
-          },
-          success: function(results){
-            console.log(results);
-            jQuery('.register-message').text(results).show();
-          },
-          error: function(results) {
-
-          }
-        });
-      });
-</script>
+        var reUserPassword = jQuery('#re-pwd').val();
+        var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+        var valid_email = '';
+        var hasError = false;
+        if(newUserEmail == '') {
+	      	jQuery('#result_msg_client').text('Please enter your email address.').show();
+	      	hasError = true;
+	    }
+	    else if(!emailReg.test(newUserEmail)) {
+	      	jQuery('#result_msg_client').text('Enter a valid email address.').show();
+	      	hasError = true;
+	    }
+	    else{
+	    	valid_email = newUserEmail;
+	    }
+		if((newUserName.length>0)&&(valid_email.length>0)&&(newUserPassword.length>0)&&(reUserPassword.length>0)){
+        	if(newUserPassword==reUserPassword){
+	        	jQuery.ajax({
+	                type:"POST",
+	                url:"<?php echo admin_url('admin-ajax.php'); ?>",
+	                data: {
+	                    action: "register_user_front_end",
+	                    new_user_name : newUserName,
+	                    new_user_email : valid_email,
+	                    new_user_password : newUserPassword
+	                },
+	                success: function(results){
+	                  	if(results.success==true){
+							jQuery('#resgistration_form')[0].reset();
+						}
+						jQuery('#result_msg_client').text(results).show();
+	                },
+	                error: function(results) {
+	        			
+	                 	}
+	                });
+	            }
+	            else{
+	            	alert('password does not match');
+	            }
+	        }
+	        else{
+	        	alert('field is required');
+	     	}
+      	});
+    </script>
 <?php get_footer(); ?>

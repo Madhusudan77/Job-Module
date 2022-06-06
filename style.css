@@ -3,25 +3,45 @@
  Template:     twentytwentyone
 */
 
-.navigation_tabs a.active.show {
-    background: #7d7c7c !important;
+.form-group input {
+    margin-bottom: 0 !important;
 }
-.navigation_tabs li a{
+a.login_button {
+    position: absolute;
+    top: 50px;
+    right: 50px;
     padding: 10px 20px;
-    text-decoration: none !important;
-    border-top: 1px solid #000000;
-    border-right: 1px solid #000000;
+    background: #cccccc;
     color: #ffffff;
-    border-left: 1px solid #000000;
-    background: #cccccc !important;
+    text-decoration: none;
+}
+
+form#resgistration_form ,#resgistration_form_client {
+    background: #cccccc4f;
+    padding: 10px;
+    border: 1px solid #cccccc;
+    box-shadow: 0 0 12px 6px #cccccc;
+    margin-top: 10px;
+}
+.nav-tabs a {
+    padding: 10px 20px;
+    background: #cccccc;
+    color: #ffffff;
+    text-decoration: none;
+}
+.nav-tabs a.active.show{
+    background: #777777 !important;
 }
 .nav-tabs {
-    border-bottom: 1px solid #a2a2a2;
-    padding-bottom: 6px;
-    margin-top: 20px;
+    border-bottom: 1px solid #dee2e6;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
 }
 
-
+h2.header {
+    margin-top: 30px;
+    margin-bottom: 25px;
+}
 
 form#login {
     display: none;
@@ -30,10 +50,9 @@ form#login {
     top: 50%;
     padding: 40px 25px 25px 25px;
     width: 350px;
+    transform: translate(-50%, -50%);
     z-index: 999;
     left: 50%;
-    transform: translate(-50%,-50%);
-    /* margin-left: -200px; */
 }
 
 form#login p.status{
@@ -47,4 +66,10 @@ form#login p.status{
     opacity: 0.9;
     position: fixed;
     z-index: 998;
+}
+a#show_login {
+    background: #6f6f6f;
+    padding: 10px 20px;
+    color: #ffffff;
+    text-decoration: none;
 }
