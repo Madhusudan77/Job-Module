@@ -73,3 +73,38 @@ a#show_login {
     color: #ffffff;
     text-decoration: none;
 }
+
+.modal_display {
+    background: #86888782;
+    padding: 20px;
+    box-shadow: 0 0 20px 10px #cccccc;
+}
+.modal_display input {
+    border: 1px solid #91919173 !important;
+    height: 45px !important;
+}
+.modal_display input.acf-button {
+    height: 60px !important;
+}
+
+.container_class {
+    padding: 15px;
+}
+.inner_class {
+    background: #ffffff;
+    padding: 10px;
+    height: 100%;
+}
+.container_class h3 {
+    font-size: 22px;
+    text-transform: capitalize;
+}
+.container_class .title_class a:hover {
+    color: green;
+}
+.container_class .title_class a ,.read_more {
+    text-decoration: none !important;
+}
+.container_class .title_class h4 {
+    font-size: 15px;
+}

@@ -1,10 +1,16 @@
 <?php get_header(); ?>
+
+
+
+
 <div class="container">
 <?php if (is_user_logged_in()) { ?>
     <a class="login_button" href="<?php echo wp_logout_url( home_url() ); ?>">Logout</a>
 <?php } else { ?>
     <a class="login_button" id="show_login" href="">Login</a>
 <?php } ?>
+
+
 <?php if (!is_user_logged_in()) {?>
 
 	<h2 class="header">Register Yourself As A Client or Contractor:</h2>
@@ -14,6 +20,7 @@
   	</ul>
   	<div class="tab-content">
   		<div id="home" class="tab-pane fade in active">
+  			<!-- Contractor Form -->
 		    <form action="#" id="resgistration_form" method="POST" name="register-form" class="register-form">
 		      	<fieldset>
 					<div class="form-group">
@@ -41,6 +48,7 @@
 		      </fieldset>
 		    </form>
 		</div>
+		<!-- Client Form -->
 		<div id="menu1" class="tab-pane fade">
 			<form action="#" id="resgistration_form_client" method="POST" name="register-form" class="cregister-form">
 		      	<fieldset>
@@ -73,6 +81,7 @@
 		
 <?php }?>
 
+<!-- Login form -->
 <?php if (!is_user_logged_in()) {?>
 <form id="login" action="login" method="post">
         <h1>Site Login</h1>
@@ -90,6 +99,23 @@
 
 
 
+<?php if (is_user_logged_in()) {?>
+	<div class="modal_display">
+		<h3 class="header_job">Register a service</h3>
+		<?php
+		acf_form_head();
+		acf_form(array(
+			'post_id'		=> 'new_post',
+			'post_title'	=> true,
+			'post_content'	=> true,
+			'new_post'		=> array(
+				'post_type'		=> 'jobs',
+				'post_status'	=> 'publish'
+			)
+		));?>
+	</div>
+	
+<?php }?>
 </div>
     <script type="text/javascript">
     	//for contractor
@@ -197,5 +223,7 @@
 	        	alert('field is required');
 	     	}
       	});
+
+    	
     </script>
 <?php get_footer(); ?>

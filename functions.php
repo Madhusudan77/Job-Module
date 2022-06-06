@@ -154,8 +154,6 @@ function ajax_login_init(){
         'redirecturl' => home_url(),
         'loadingmessage' => __('Sending user info, please wait...')
     ));
-
-    // Enable the user with no privileges to run ajax_login() in AJAX
     add_action( 'wp_ajax_nopriv_ajaxlogin', 'ajax_login' );
 }
 
@@ -184,3 +182,20 @@ function ajax_login(){
 
     die();
 }
+
+
+
+
+!defined( 'ABSPATH' ) AND exit;
+function wpse66093_no_admin_access()
+{
+    if ( ! is_admin()|| (is_user_logged_in() && isset( $GLOBALS['pagenow'] ) AND 'wp-login.php' === $GLOBALS['pagenow'])) {
+        return;
+    }
+
+    $redirect = isset( $_SERVER['HTTP_REFERER'] ) ? $_SERVER['HTTP_REFERER'] : home_url( '/' );
+    if (current_user_can( 'client' ) OR current_user_can( 'client' ))
+        exit( wp_redirect( $redirect ) );
+}
+add_action( 'admin_init', 'wpse66093_no_admin_access', 100 );
+
