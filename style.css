@@ -91,13 +91,19 @@ a#show_login {
     padding: 15px;
 }
 .inner_class {
+    box-shadow: 0 0 7px 1px #cccccc;
     background: #ffffff;
     padding: 10px;
-    height: 100%;
+    height: 340px;
+    position: relative;
 }
 .container_class h3 {
-    font-size: 22px;
+    font-size: 18px;
+    text-decoration: underline;
     text-transform: capitalize;
+    line-height: 1.2;
+    margin-bottom: 8px;
+    margin-top: 5px;
 }
 .container_class .title_class a:hover {
     color: green;
@@ -107,4 +113,28 @@ a#show_login {
 }
 .container_class .title_class h4 {
     font-size: 15px;
+}
+.image_class {
+    overflow: hidden;
+    position: relative;
+}
+.image-class {
+    width: 100%;
+    height: 160px;
+    background-size: cover;
+    transition: all 1s;
+}
+
+.inner_class:hover .image-class{
+    transform: scale(1.2);
+}
+
+.content_class .read_more h5:hover {
+    font-size: 15px;
+}
+.content_class .read_more h5 {
+    font-size: 14px;
+    position: absolute;
+    bottom: 6px;
+    transition: font-size .2s;
 }

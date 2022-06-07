@@ -1,6 +1,6 @@
 <?php
 
-
+add_action( 'wp_enqueue_scripts', 'enqueue_media' );
 function enqueue_media() {
     wp_enqueue_style( 'style-name', get_stylesheet_uri() );
     wp_enqueue_script( 'script-name', get_template_directory_uri() . '/js/widget-js.js', array(), '1.0.0', true );
@@ -12,7 +12,6 @@ function enqueue_media() {
     wp_enqueue_media();
 
 }
-add_action( 'wp_enqueue_scripts', 'enqueue_media' );
 
 
 add_action( 'wp_enqueue_scripts', 'my_plugin_add_stylesheet' );
@@ -21,9 +20,7 @@ function my_plugin_add_stylesheet() {
 }
 
 
-
 //Add a custom user role
-
 $result = add_role( 'client', __('Client' ), array(
     'read' => true, 
     'edit_posts' => true,
@@ -37,7 +34,6 @@ $result = add_role( 'client', __('Client' ), array(
     'update_plugin' => false,
     'update_core' => false 
 ) );
-
 $result = add_role( 'contractor', __('Contractor' ), array(
     'read' => true, 
     'edit_posts' => true,
@@ -68,9 +64,22 @@ function job_module ()
         'supports' => array ('title', 'editor', 'thumbnail')
         )
     );
+    register_taxonomy(
+        'services_categories',
+        'jobs',
+        array(
+            'labels' => array(
+                'name' => 'Services Categories',
+                'add_new_item' => 'Add New Service Category',
+                'new_item_name' => "New Service Category"
+            ),
+            'show_ui' => true,
+            'show_tagcloud' => false,
+            'hierarchical' => true,
+            'hasArchive' => true
+        )
+    );
 }
-
-
 
 
 
@@ -161,7 +170,7 @@ function ajax_login_init(){
 if (!is_user_logged_in()) {
     add_action('init', 'ajax_login_init');
 }
-
+//ajax login form
 function ajax_login(){
 
     // First check the nonce, if it fails the function will break
@@ -184,8 +193,7 @@ function ajax_login(){
 }
 
 
-
-
+//restricting client from getting to the dashboard
 !defined( 'ABSPATH' ) AND exit;
 function wpse66093_no_admin_access()
 {
