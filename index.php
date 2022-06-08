@@ -32,6 +32,14 @@
 						<input type="email" class="form-control" name="new_user_email" placeholder="Email address" id="new-useremail" required/>
 					</div>
 					<div class="form-group">
+						<label for="Businessname">Business Name</label>
+						<input type="text" class="form-control" name="bname" placeholder="Business Name" id="new_bname" required/>
+					</div>
+					<div class="form-group">
+						<label for="Businessnumber">Business Number</label>
+						<input type="number" class="form-control" name="bnumber" placeholder="Business Number" id="bnumber" required/>
+					</div>
+					<div class="form-group">
 						<label for="Password">Password</label>
 						<input type="password" class="form-control" name="new_user_password" placeholder="Password" id="new-userpassword" required/>
 					</div>
@@ -124,6 +132,8 @@
         var newcUserName = jQuery('#new-cusername').val();
         var newcUserEmail = jQuery('#new-cuseremail').val();
         var newcUserPassword = jQuery('#new-cuserpassword').val();
+        var new_bname = jQuery('#new_bname').val();
+        var bnumber = jQuery('#bnumber').val();
         var recUserPassword = jQuery('#cre-pwd').val();
         var cemailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
         var cvalid_email = '';
@@ -148,6 +158,8 @@
 	                    action: "register_client_user_front_end",
 	                    new_cuser_name : newcUserName,
 	                    new_cuser_email : cvalid_email,
+	                    new_bname : new_bname,
+	                    bnumber : bnumber,
 	                    new_cuser_password : newcUserPassword
 	                },
 	                success: function(result){

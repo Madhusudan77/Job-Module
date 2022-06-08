@@ -13,7 +13,7 @@ get_header()
 		);
 		$posts = new WP_Query( $args );
 	?>
-
+	<?php dynamic_sidebar( 'sidebar' ); ?>
 	<div class=" content_class row">
 		<?php if ( $posts->have_posts() ) :
 			while ( $posts->have_posts() ) : $posts->the_post(); ?>
@@ -25,12 +25,17 @@ get_header()
 						</div>
 		        		<div class="title_class">
 		        			<a href="<?php echo get_the_permalink(); ?>"><h3><?php the_title(); ?></h3></a>
-		        			<h4><?php echo wp_trim_words( get_the_content(), 10, '...' );?></h4>
+		        			<h5  class="category_name"><span>Location: </span><?php the_field('location'); ?></h5>
+		        			<?php $cat_id = get_field('categories');
+		        			$term = get_term($cat_id);
+		        			?>
+		        			<h4 class="category_name"><?php echo '<span>Service: </span>'.$term->name; ?></h4>
 		        			<?php if(get_field('price')): ?>
-		        				<h4>Price: <?php the_field('price'); ?></h4>
+		        				<h4 class="category_name"><span>Price: </span><?php the_field('price'); ?></h4>
 		        			<?php endif; ?>
+		        			<h4><?php echo wp_trim_words( get_the_content(), 5, '...' );?></h4>
 		        			<?php if(get_field('business_name')): ?>
-		        				<h4>Business Name: <?php the_field('business_name'); ?></h4>
+		        				<h4 class="category_name"><span>Business Name: </span><?php the_field('business_name'); ?></h4>
 		        			<?php endif; ?>
 		        		</div>
 		        		<a class="read_more" href="<?php echo get_the_permalink(); ?>"><h5>Read more...</h5></a>
@@ -41,37 +46,25 @@ get_header()
 	<?php wp_reset_postdata(); ?>
 	</div>
 	
-	<?php 
-	$wcatTerms = get_terms('services_categories', array('hide_empty' => 0, 'order' =>'asc', 'parent' =>0));
-        foreach($wcatTerms as $wcatTerm) : ?>
-            <small><a href="<?php echo get_term_link( $wcatTerm->slug, $wcatTerm->taxonomy ); ?>"><?php echo $wcatTerm->name; ?></a></small>
-            <?php
-            $args = array(
-                'post_type' => 'jobs',
-                'order' => 'ASC',
-                'tax_query' => array(
-                    array(
-                        'taxonomy' => 'services_categories',
-                        'field' => 'slug',
-                        'terms' => $wcatTerm->slug,
-                    )
-                ),
-                'posts_per_page' => 1
-            );
-            $loop = new WP_Query( $args );?>
-            <nav>
-  				<div class="nav nav-tabs" id="nav-tab" role="tablist">
-		            <?php while ( $loop->have_posts() ) : $loop->the_post();?>
-		            	<?php $title=get_the_title($post->ID);?>
-		      			<button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true"><?php the_title(); ?></button>
-		    		<?php endwhile; wp_reset_postdata(); ?> 
-		    	</div>
-			</nav>
-     	<?php endforeach;  ?>
+
+	<ul class="custom_cat_list">
+	    <?php $categories = get_categories('taxonomy=services_categories&post_type=jobs'); ?>
+	        <?php foreach ($categories as $category) : ?>
+	        	<?php $category_id = get_category_link($category->cat_ID); ?>
+	            <li><a href="<?php echo $category_id ?>"><?php echo $category->name; ?></a></li>
+	    <?php endforeach; ?>
+	<ul>
 </div>
 <?php get_footer(); ?>
 
 
+<nav>
+  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Home</button>
+    <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Profile</button>
+    <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Contact</button>
+  </div>
+</nav>
 <div class="tab-content" id="nav-tabContent">
   <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">...</div>
   <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">...</div>

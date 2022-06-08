@@ -82,7 +82,6 @@ function job_module ()
 }
 
 
-
 //for contractor
 add_action('wp_ajax_register_user_front_end', 'register_user_front_end', 0);
 add_action('wp_ajax_nopriv_register_user_front_end', 'register_user_front_end');
@@ -91,17 +90,25 @@ function register_user_front_end() {
       $new_user_email = stripcslashes($_POST['new_user_email']);
       $new_user_password = $_POST['new_user_password'];
       $user_nice_name = strtolower($_POST['new_user_email']);
+      $new_bname = stripcslashes($_POST['new_bname']);
+      $bnumber = stripcslashes($_POST['bnumber']);
       $user_data = array(
           'user_login' => $new_user_name,
           'user_email' => $new_user_email,
           'user_pass' => $new_user_password,
           'user_nicename' => $user_nice_name,
           'display_name' => $new_user_first_name,
+          'new_bname' => $new_bname,
+          'bnumber' => $bnumber,
           'role' => 'contractor'
         );
       $user_id = wp_insert_user($user_data);
         if (!is_wp_error($user_id)) {
-          echo'we have Created an account for you.';
+            $to = $new_user_email;
+            $subject = 'The subject';
+            $body = 'The email body content';
+            wp_mail( $to, $subject, $body );
+            echo'we have Created an account for you.';
         } else {
             if (isset($user_id->errors['empty_user_login'])) {
               $notice_key = 'User Name and Email are mandatory';
@@ -116,6 +123,7 @@ function register_user_front_end() {
         }
     die;
 }
+
 
 
 //for client
@@ -200,10 +208,51 @@ function wpse66093_no_admin_access()
     if ( ! is_admin()|| (is_user_logged_in() && isset( $GLOBALS['pagenow'] ) AND 'wp-login.php' === $GLOBALS['pagenow'])) {
         return;
     }
-
     $redirect = isset( $_SERVER['HTTP_REFERER'] ) ? $_SERVER['HTTP_REFERER'] : home_url( '/' );
     if (current_user_can( 'client' ) OR current_user_can( 'client' ))
         exit( wp_redirect( $redirect ) );
 }
 add_action( 'admin_init', 'wpse66093_no_admin_access', 100 );
 
+
+
+// add our widget locations
+function ourWidget(){
+    register_sidebar(array(
+     'name' => 'Sidebar',
+     'id' => 'sidebar'
+    ));
+}
+add_action('widgets_init', 'ourWidget');
+
+
+add_action( 'user_new_form', 'crf_admin_registration_form' );
+function crf_admin_registration_form( $operation ) {
+    if ( 'add-new-user' !== $operation ) {
+        // $operation may also be 'add-existing-user'
+        return;
+    }
+
+    $year = ! empty( $_POST['year_of_birth'] ) ? intval( $_POST['year_of_birth'] ) : '';
+
+    ?>
+    <h3><?php esc_html_e( 'Personal Information', 'crf' ); ?></h3>
+
+    <table class="form-table">
+        <tr>
+            <th><label for="year_of_birth"><?php esc_html_e( 'Year of birth', 'crf' ); ?></label> <span class="description"><?php esc_html_e( '(required)', 'crf' ); ?></span></th>
+            <td>
+                <input type="number"
+                   min="1900"
+                   max="2017"
+                   step="1"
+                   id="year_of_birth"
+                   name="year_of_birth"
+                   value="<?php echo esc_attr( $year ); ?>"
+                   class="regular-text"
+                />
+            </td>
+        </tr>
+    </table>
+    <?php
+}

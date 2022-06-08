@@ -102,7 +102,7 @@ a#show_login {
     text-decoration: underline;
     text-transform: capitalize;
     line-height: 1.2;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
     margin-top: 5px;
 }
 .container_class .title_class a:hover {
@@ -137,4 +137,8 @@ a#show_login {
     position: absolute;
     bottom: 6px;
     transition: font-size .2s;
+}
+
+.category_name span {
+    color: #ab6b6b;
 }
