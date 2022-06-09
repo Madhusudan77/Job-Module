@@ -142,3 +142,10 @@ a#show_login {
 .category_name span {
     color: #ab6b6b;
 }
+
+.page-id-155 .cont_class{
+    display: block !important;
+}
+.page-id-155 .client_class{
+    display: none;
+}

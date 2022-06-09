@@ -81,34 +81,93 @@ function job_module ()
     );
 }
 
+function form_shortcode(){
+    $string='
+    <h2 class="header cont_class" style="display:none;">Register Yourself As A Contractor:</h2>
+    <h2 class="header client_class">Register Yourself As A Client:</h2>
+    <div class="content_area cont_class_field">
+            <form action="#" id="resgistration_form" method="POST" name="register-form" class="register-form">
+                <fieldset>
+                    <div class="form-group">
+                        <label for="Name">Name</label>
+                        <input type="text" class="form-control" name="new_user_name" placeholder="Username" id="new-username" required/>
+                    </div>
+                    <div class="form-group">
+                        <label for="Email">Email</label>
+                        <input type="email" class="form-control" name="new_user_email" placeholder="Email address" id="new-useremail" required/>
+                    </div>
+                    <div class="form-group cont_class">
+                        <label for="Businessname">Business Name</label>
+                        <input type="text" class="form-control" name="bname" placeholder="Business Name" id="new_bname" required/>
+                    </div>
+                    <div class="form-group cont_class">
+                        <label for="Businessnumber">Business Number</label>
+                        <input type="number" class="form-control" name="bnumber" placeholder="Business Number" id="bnumber" required/>
+                    </div>
+                    <div class="form-group">
+                        <label for="Password">Password</label>
+                        <input type="password" class="form-control" name="new_user_password" placeholder="Password" id="new-userpassword" required/>
+                    </div>
+                    <div class="form-group">
+                        <label for="RePassword">Re Enter Password</label>
+                        <input type="password" class="form-control" name="re-pwd" placeholder="Re-enter Password" id="re-pwd" required/>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" class="button" id="register-button" value="Register" >
+                    </div>
+                    <div id="result_msg_client">
+                            
+                    </div>
+              </fieldset>
+            </form>
+    </div>';
+    return $string;
+}
+add_shortcode('form_shortcode', 'form_shortcode');
+
 
 //for contractor
 add_action('wp_ajax_register_user_front_end', 'register_user_front_end', 0);
 add_action('wp_ajax_nopriv_register_user_front_end', 'register_user_front_end');
 function register_user_front_end() {
-      $new_user_name = stripcslashes($_POST['new_user_name']);
-      $new_user_email = stripcslashes($_POST['new_user_email']);
-      $new_user_password = $_POST['new_user_password'];
-      $user_nice_name = strtolower($_POST['new_user_email']);
-      $new_bname = stripcslashes($_POST['new_bname']);
-      $bnumber = stripcslashes($_POST['bnumber']);
-      $user_data = array(
-          'user_login' => $new_user_name,
-          'user_email' => $new_user_email,
-          'user_pass' => $new_user_password,
-          'user_nicename' => $user_nice_name,
-          'display_name' => $new_user_first_name,
-          'new_bname' => $new_bname,
-          'bnumber' => $bnumber,
-          'role' => 'contractor'
+    $new_user_name = stripcslashes($_POST['new_user_name']);
+    $new_user_email = stripcslashes($_POST['new_user_email']);
+    $new_user_password = $_POST['new_user_password'];
+    $number = $_POST['number'];
+    $new_user_name = $new_user_name.$number;
+    $user_nice_name = strtolower($_POST['new_user_email']);
+    $new_bname = stripcslashes($_POST['new_bname']);
+    $bnumber = stripcslashes($_POST['bnumber']);
+    $business_code = $_POST['business_code'];
+    if ($business_code == 'business_code') {
+        $user_data = array(
+            'user_login' => $new_user_name,
+            'user_email' => $new_user_email,
+            'user_pass' => $new_user_password,
+            'user_nicename' => $user_nice_name,
+            'display_name' => $new_user_first_name,
+            'new_bname' => $new_bname,
+            'bnumber' => $bnumber,
+            'role' => 'contractor'
         );
+    }else{
+        $user_data = array(
+            'user_login' => $new_user_name,
+            'user_email' => $new_user_email,
+            'user_pass' => $new_user_password,
+            'user_nicename' => $user_nice_name,
+            'display_name' => $new_user_first_name,
+            'role' => 'client'
+        );
+    }
+      
       $user_id = wp_insert_user($user_data);
         if (!is_wp_error($user_id)) {
             $to = $new_user_email;
             $subject = 'The subject';
-            $body = 'The email body content';
+            $body = 'The User Name is <b>'.$new_user_name.'<b> and Password is <b> '.$new_user_password.'</b>';
             wp_mail( $to, $subject, $body );
-            echo'we have Created an account for you.';
+            echo'Your new Username and Password is send to your email.';
         } else {
             if (isset($user_id->errors['empty_user_login'])) {
               $notice_key = 'User Name and Email are mandatory';
@@ -126,39 +185,7 @@ function register_user_front_end() {
 
 
 
-//for client
-add_action('wp_ajax_register_client_user_front_end', 'register_client_user_front_end', 0);
-add_action('wp_ajax_nopriv_register_client_user_front_end', 'register_client_user_front_end');
-function register_client_user_front_end() {
-      $new_cuser_name = stripcslashes($_POST['new_cuser_name']);
-      $new_cuser_email = stripcslashes($_POST['new_cuser_email']);
-      $new_cuser_password = $_POST['new_cuser_password'];
-      $cuser_nice_name = strtolower($_POST['new_cuser_password']);
-      $user_data1 = array(
-          'user_login' => $new_cuser_name,
-          'user_email' => $new_cuser_email,
-          'user_pass' => $new_cuser_password,
-          'user_nicename' => $cuser_nice_name,
-          'display_name' => $new_user_first_name1,
-          'role' => 'client'
-        );
-      $user_id_client = wp_insert_user($user_data1);
-        if (!is_wp_error($user_id_client)) {
-          echo'we have Created an account for you.';
-        } else {
-            if (isset($user_id_client->errors['empty_user_login'])) {
-              $cnotice_key = 'User Name and Email are mandatory';
-              echo $cnotice_key;
-            } elseif (isset($user_id_client->errors['existing_user_login'])) {
-              echo'User name already exixts.';
-            } elseif(email_exists($new_cuser_email)) {
-              echo'Email already exixts.';
-            } else{
-                echo'Error in data';
-            }
-        }
-    die;
-}
+
 
 
 function ajax_login_init(){
