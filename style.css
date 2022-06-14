@@ -2,7 +2,17 @@
  Theme Name:   Twenty Twenty-One Child
  Template:     twentytwentyone
 */
-
+.error_class {
+    color: #eb6146;
+    font-size: 13px;
+}
+#message_show {
+    color: #059803;
+}
+.title_error {
+    color: red;
+    font-size: 13px;
+}
 .form-group input {
     margin-bottom: 0 !important;
 }
@@ -148,4 +158,7 @@ a#show_login {
 }
 .page-id-155 .client_class{
     display: none;
+}
+#user_last_id{
+    color: transparent;
 }
