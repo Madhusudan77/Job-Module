@@ -103,8 +103,8 @@ function user_registration_form_shortcode($attr){
     }
     if (!is_user_logged_in()){
     $string='
-    <h2 class="header cont_class" style="display:none;">Register Yourself As A Contractor:</h2>
-    <h2 class="header client_class">Register Yourself As A Client:</h2>
+    <h2 class="header cont_class" style="display:none;">Register Yourself :</h2>
+    <h2 class="header client_class">Register Yourself :</h2>
     <div class="content_area cont_class_field">
             <form action="#" id="resgistration_form" method="POST" name="register-form" class="register-form">
                     <div id="result_msg_client" class="error_class">
@@ -284,7 +284,7 @@ function ajax_login(){
 }
 
 
-
+//ajax function for new post creation and sending mail
 add_action('wp_ajax_create_form_post', 'create_form_post', 0);
 add_action('wp_ajax_nopriv_create_form_post', 'create_form_post');
 function create_form_post() {
@@ -293,7 +293,9 @@ function create_form_post() {
     $jobDesc = $_POST['jobDesc'];
     $jobAmt = $_POST['jobAmt'];
     $payAmt = $_POST['payAmt'];
-    $thumbnail = $_POST['thumbnail'];
+    $fileName = preg_replace('/\s+/', '-', $_FILES["file"]["name"]);
+    $fileName = preg_replace('/[^A-Za-z0-9.\-]/', '', $fileName);
+    $fileName = time().'-'.$fileName;
     $note_client = $_POST['note_client'];
     $perNotes = $_POST['perNotes'];
     $post_id = wp_insert_post(array (
@@ -306,33 +308,75 @@ function create_form_post() {
     ));
     update_field('field_62a59ce3ee299', $jobAmt, $post_id);
     update_field('field_62a59d36ee29a', $payAmt, $post_id);
-    update_field('field_62a59d70ee29b', $thumbnail, $post_id);
+    wp_upload_bits($fileName, null, file_get_contents($_FILES["file"]["tmp_name"]));
     update_field('field_62a59d99ee29c', $note_client, $post_id);
     update_field('field_62a59dafee29d', $perNotes, $post_id);
     if($jobtitle==''){
         echo 'Job Title is compulsory';
     }
     else{ 
-        echo'New Post Created.';
-        $users = get_users( array( 'role' => 'client' ) );
-        foreach ( $users as $user ) { 
-            $email = get_user_meta($user->ID, "email", true);
-            $to=$email;
-            $subject='New post';
-            $body = 'Testing';
-            wp_mail($to,$subject,$body);
-        }
-        $users = get_users();
-        foreach ($users as $user ) { 
-            if ( in_array( 'client', (array) $user->roles ) ) {
-                $email = get_user_meta($user->ID, "email", true);
-                $to=$email;
-                $subject='New post';
-                $body = 'Testing';
-                wp_mail($to,$subject,$body);
+        echo $thumbnail;
+
+        //mailing part
+        $user_ID = get_current_user_id(); 
+        $user = new WP_User( $user_ID );
+        if ( !empty( $user->roles ) && is_array( $user->roles ) ) {
+            foreach ( $user->roles as $role ){
+                if($role=='client'){
+                    $role='contractor';
+                }else if($role=='contractor'){
+                    $role='client';
+                }
+                $users = get_users( array( 'role' => $role ) );
+                if( ! empty( $users ) ) {
+                    $emails = wp_list_pluck( $users, 'user_email' );
+                    $to=$emails;
+                    $subject='New post';
+                    $body = 'New Post is created <b>'.$jobtitle.'</b>';
+                    wp_mail($to,$subject,$body);
+                }
             }
         }
+        
          
     }
     die();
+}
+
+
+
+
+add_action('wp_ajax_load_more_action','load_more_action');
+add_action('wp_ajax_nopriv_load_more_action','load_more_action');
+function load_more_action(){
+    $args1 = array(
+            'post_type' => 'jobs',
+            'paged' => $_POST['page']
+        );
+        $posts = new WP_Query( $args1 );
+    ?>
+    <?php if ( $posts->have_posts() ) :?>
+            <?php while ( $posts->have_posts() ) : $posts->the_post(); ?>
+                <div class="content_inner_class col-4">
+                    <div class="padded_class">
+                        <div class="image_class">
+                            <?php $image = get_field('upload_photos');
+                            if( !empty( $image ) ){ ?>
+                                <div class="img_class" style="background-image: url(<?php echo esc_url($image['url']); ?>);"></div>
+                            <?php }
+                            else { ?>
+                                <div class="img_class" style="background-image: url(<?php echo get_the_post_thumbnail_url(); ?>);"></div>
+                            <?php } ?>
+                        </div>
+                        <a href="<?php echo get_permalink();?>"><?php the_title(); ?></a>
+                        <h4><?php echo wp_trim_words( get_the_content(), 10 ); ?></h4>
+                        <h4 class="price_class">Price : <span><?php echo get_field('payment_amount'); ?></span></h4>
+                        <a class="btn btn-primary" href="<?php echo get_permalink();?>" role="button">View More</a>
+                    </div>
+                </div>
+            <?php endwhile; ?>
+        <?php endif;
+    wp_reset_postdata();
+
+    wp_die();
 }

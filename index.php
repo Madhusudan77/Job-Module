@@ -4,11 +4,6 @@ acf_form_head();
 
 <div class="container">
 
-<?php if (!is_user_logged_in()) {?> 		
-<?php echo do_shortcode('[user_registration_form_shortcode contractor="none"]'); ?>
-<?php }?>
-
-
 <?php if (is_user_logged_in()) {?>
 	<form  action="#" id="post_form" method="POST" name="form_post" class="register-form" enctype="multipart/form-data">
 		<div id="message_show">
@@ -17,7 +12,7 @@ acf_form_head();
 		<div class="form-group">
 		    <label for="jobTitle">Job Title</label>
 		    <input type="text" class="form-control" id="jobtitle" required/>
-		    <div class="title_error"></div>
+		    <div class="title_error field_error"></div>
   		</div>
   		<div class="form-group">
     		<label for="jobDesc">Job Description</label>
@@ -27,15 +22,17 @@ acf_form_head();
     		<div class="col">
     			<label for="jobAmt">Total Job Amount</label>
       			<input type="text" class="form-control"  id="jobAmt" required/>
+      			<div class="jobAmt_error field_error"></div>
     		</div>
     		<div class="col">
     			<label for="payAmt">Payment Amount</label>
       			<input type="text" class="form-control"  id="payAmt" required/>
+      			<div class="payAmt_error field_error"></div>
     		</div>
   		</div>
   		<div class="form-group">
     			<label for="upPhotos">Upload Plotos</label>
-    			<input type="file" class="form-control-file" name="thumbnail" id="thumbnail">
+    			<input type="file" name="file" id="file" />
   			</div>
   			<hr>
   			<div class="form-group">
@@ -58,16 +55,31 @@ acf_form_head();
 <script type="text/javascript">
 	
 	jQuery('#form_submit_btn').on('click',function(e){
-		jQuery('.title_error').text('Title Required.').hide();
         e.preventDefault();
         var jobtitle = jQuery('#jobtitle').val();
         var jobDesc = jQuery('#jobDesc').val();
         var jobAmt = jQuery('#jobAmt').val();
         var payAmt = jQuery('#payAmt').val();
-        var thumbnail = jQuery('#thumbnail').val();
+        var fileInputElement = document.getElementById("file");
+  		var fileName = fileInputElement.files[0].name;
         var note_client = jQuery('#note_client').val();
         var perNotes = jQuery('#perNotes').val();
-        if(!(jobtitle=='')){
+        if(jobAmt == ''){
+        	jQuery('.jobAmt_error').text('Please enter amount.').show();
+        }else{
+        	jQuery('.jobAmt_error').text('Please enter amount.').hide();
+        }
+        if(payAmt == ''){
+        	jQuery('.payAmt_error').text('Please enter amount.').show();
+        }else{
+        	jQuery('.payAmt_error').text('Please enter amount.').hide();
+        }
+        if(jobtitle == ''){
+        	jQuery('.title_error').text('Please enter job title.').show();
+        }else{
+        	jQuery('.title_error').text('Please enter job title.').hide();
+        }
+        if((jobtitle.length>0)&&(jobAmt.length>0)&&(payAmt.length>0)){
         	jQuery.ajax({
                 type:"POST",
                 url:"<?php echo admin_url('admin-ajax.php'); ?>",
@@ -77,22 +89,22 @@ acf_form_head();
                     jobDesc : jobDesc,
                     jobAmt : jobAmt,
                     payAmt : payAmt,
-                    thumbnail : thumbnail,
+                    fileName : fileName,
                     note_client : note_client,
                     perNotes : perNotes
                 },
                 success: function(data){
-                	if(data.success==true){
-						jQuery('#post_form')[0].reset();
-					}
+                	jQuery('#post_form')[0].reset();
 					jQuery('#message_show').text(data).show();
                 },
                 error: function(data) {
         			
                 }
             });
+            jQuery('#message_show').removeClass('field_errors')
         }else{
-        	jQuery('.title_error').text('Title Required.').show();
+        	jQuery('#message_show').addClass('field_errors')
+        	jQuery('#message_show').text('Fields are required.').show();
         }	
     });
 
