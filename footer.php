@@ -1,3 +1,25 @@
+<!-- <script type="text/javascript">
+    jQuery(document).ready(function(e){
+    	var page_count = '<?php// echo ceil(wp_count_posts('jobs')->publish/2);?>';
+        var page = 2;
+        var ajaxurl = "<?php //echo admin_url('admin-ajax.php'); ?>";
+        jQuery('#more_posts').click(function(){
+            var data = {
+                'action':'load_more_action',
+                'page':page
+            };
+            jQuery.post(ajaxurl, data, function(response){
+                jQuery('#job_posts').append(response);
+                page++;
+                if(page_count==page){
+                	jQuery('#more_posts').hide();
+                	jQuery('#job_posts').append('<div class="no_more_class">No More jobs</div>');
+                }
+                
+            });
+        });
+    });
+</script> -->
 <script type="text/javascript">
      // for client
     jQuery('#register-button').on('click',function(e){
