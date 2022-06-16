@@ -132,3 +132,9 @@ a#show_login {
 .content_class .no_more_class {
     width: 100%;
 }
+div#loading {
+    text-align: center !important;
+}
+div#loading img {
+    max-width: 130px;
+}

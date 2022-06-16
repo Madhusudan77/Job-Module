@@ -48,38 +48,73 @@ $result = add_role( 'contractor', __('Contractor' ), array(
     'update_core' => false 
 ) );
 
-
-
 //custom post type job module
 add_action( 'init', 'job_module' );
 function job_module ()
 {
-    register_post_type( 'jobs',
-        array(
-            'labels' => array(
-                'name' => __( 'Jobs' ),
-                'singular_name' => __( 'Job' )
-            ),
-        'public' => true,
-        'supports' => array ('title', 'editor', 'thumbnail')
-        )
-    );
-    register_taxonomy(
-        'services_categories',
-        'jobs',
-        array(
-            'labels' => array(
-                'name' => 'Services Categories',
-                'add_new_item' => 'Add New Service Category',
-                'new_item_name' => "New Service Category"
-            ),
-            'show_ui' => true,
-            'show_tagcloud' => false,
-            'hierarchical' => true,
-            'hasArchive' => true
-        )
-    );
+$labels = array( 
+    'name' => __( 'Jobs', 'jobs' ),
+    'singular_name' => __( 'Job', 'jobs' ),
+    'add_new' => __( 'Add New', 'jobs' ),
+    'add_new_item' => __( 'Add New Job', 'jobs' ),
+    'edit_item' => __( 'Edit Job', 'jobs' ),
+    'new_item' => __( 'New Job', 'jobs' ),
+    'view_item' => __( 'View Job', 'jobs' ),
+    'search_items' => __( 'Search Jobs', 'jobs' ),
+    'not_found' => __( 'No jobs found', 'jobs' ),
+    'not_found_in_trash' => __( 'No jobs found in Trash', 'jobs' ),
+    'parent_item_colon' => __( 'Parent Job:', 'jobs' ),
+    'menu_name' => __( 'Jobs', 'jobs' ),
+);
+
+$args = array( 
+    'labels' => $labels,
+    'hierarchical' => true,
+    'description' => 'Jobs and Services',
+    'supports' => array( 'title', 'editor', 'author', 'thumbnail'),
+    'public' => true,
+    'show_ui' => true,
+    'show_in_menu' => true,
+    'menu_icon' => 'dashicons-portfolio',
+    'show_in_nav_menus' => true,
+    'publicly_queryable' => true,
+    'exclude_from_search' => false,
+    'has_archive' => true,
+    'query_var' => true,
+    'can_export' => true,
+    'rewrite' => true,
+    'capabilities' => array(
+        'edit_post' => 'edit_job',
+        'edit_posts' => 'edit_jobs',
+        'edit_others_posts' => 'edit_other_jobs',
+        'publish_posts' => 'publish_jobs',
+        'read_post' => 'read_job',
+        'read_private_posts' => 'read_private_jobs',
+        'delete_post' => 'delete_job'
+    ),
+    // as pointed out by iEmanuele, adding map_meta_cap will map the meta correctly 
+    'map_meta_cap' => true
+);
+
+register_post_type( 'jobs', $args );
 }
+
+function add_theme_caps() {
+    // gets the administrator role
+    $admins = get_role( 'administrator' );
+
+    $admins->add_cap( 'edit_job' ); 
+    $admins->add_cap( 'edit_jobs' ); 
+    $admins->add_cap( 'edit_other_jobs' ); 
+    $admins->add_cap( 'publish_jobs' ); 
+    $admins->add_cap( 'read_job' ); 
+    $admins->add_cap( 'read_private_jobs' ); 
+    $admins->add_cap( 'delete_job' ); 
+}
+add_action( 'admin_init', 'add_theme_caps');
+
+
+
 //user_registration_form_shortcode
 function user_registration_form_shortcode($attr){
     $user_role = shortcode_atts( array(
@@ -145,7 +180,7 @@ function user_registration_form_shortcode($attr){
 add_shortcode('user_registration_form_shortcode', 'user_registration_form_shortcode');
 
 
-//for contractor
+//for contractor and client email sending and job creation
 add_action('wp_ajax_register_user_front_end', 'register_user_front_end', 0);
 add_action('wp_ajax_nopriv_register_user_front_end', 'register_user_front_end');
 function register_user_front_end() {
@@ -342,21 +377,74 @@ function create_form_post() {
     }
     die();
 }
+//jobs_listing_shortcode
+function jobs_listing_shortcode($attr){
+    if (is_user_logged_in()) {?>
+        <div class='heading_class' ><h2>Jobs</h2></div>
+        <?php $user_role = shortcode_atts( array(
+            'contractor' => 'contractor_role'
+        ), $attr );
+        if($user_role['contractor']=='contractor'){?>
+            <div class=" content_class contractor_class row  align-items-start" id="job_posts">
+        <?php }
+        else{?>
+            <div class=" content_class row  align-items-start" id="job_posts">
+            <?php }?>
+        
+        
+            </div>
+        <div id="loading"></div>
+    <?php }
+}
+add_shortcode('jobs_listing_shortcode','jobs_listing_shortcode');
 
-
-
-
+//load more ajax function
 add_action('wp_ajax_load_more_action','load_more_action');
 add_action('wp_ajax_nopriv_load_more_action','load_more_action');
 function load_more_action(){
+
+    $jobs_class = $_POST['jobs_class'];
+    
+    if($jobs_class=='contractor'){
+        $user_ID = get_current_user_id(); 
+        $user = new WP_User( $user_ID );
+        if ( !empty( $user->roles ) && is_array( $user->roles ) ) {
+            foreach ( $user->roles as $role ){
+                $current_role='contractor';
+            }
+        }
+    }else if($jobs_class=='client'){
+        $user_ID = get_current_user_id(); 
+        $user = new WP_User( $user_ID );
+        if ( !empty( $user->roles ) && is_array( $user->roles ) ) {
+            foreach ( $user->roles as $role ){
+                $current_role='client';
+            }
+        }
+    }else if($jobs_class==''){
+        $user_ID = get_current_user_id(); 
+        $user = new WP_User( $user_ID );
+        if ( !empty( $user->roles ) && is_array( $user->roles ) ) {
+            foreach ( $user->roles as $role ){
+                $current_role='administrator';
+            }
+        }
+    }
+
+    
+    
+    $ids = get_users( array('role' => $current_role ,'fields' => 'ID') );
     $args1 = array(
             'post_type' => 'jobs',
+            'author' => implode(',', $ids),
+            'post_status'=>'publish',
             'paged' => $_POST['page']
         );
         $posts = new WP_Query( $args1 );
     ?>
     <?php if ( $posts->have_posts() ) :?>
             <?php while ( $posts->have_posts() ) : $posts->the_post(); ?>
+
                 <div class="content_inner_class col-4">
                     <div class="padded_class">
                         <div class="image_class">
@@ -380,3 +468,24 @@ function load_more_action(){
 
     wp_die();
 }
+
+
+add_action('wp_ajax_accept_ajax_function','accept_ajax_function');
+add_action('wp_ajax_nopriv_accept_ajax_function','accept_ajax_function');
+function accept_ajax_function(){
+
+
+    $button_value = $_POST['button_value'];
+    $post_id = $_POST['post_id'];
+    echo $button_value;
+    $post_id = $post_id;
+    if($button_value=='Accept'){
+        $value = array("accept");
+        update_field( "field_62a9c3af758e4", $value, $post_id );
+    }else if($button_value=='Decline'){
+        $value = array("");
+         update_field( "field_62a9c3af758e4", $value, $post_id );
+    }
+    wp_die();
+}
+   
