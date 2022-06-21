@@ -144,18 +144,11 @@
 	var page_count = '<?php echo ceil(wp_count_posts('jobs')->publish/2);?>';
     var page = 1;
     
-    if (jQuery("#job_posts").hasClass("contractor_class")) {
-    	var jobs_class = 'contractor';
-    }
-    else{
-    	var jobs_class = 'client';
-    }
     jQuery(document).ready(function(){
     	jQuery('#loading').html('<p><img src="http://localhost/services/wp-content/uploads/2022/06/ajax-loader.gif"></p>');
         var data = {
             'action':'load_more_action',
-            'page':page,
-            'jobs_class':jobs_class
+            'page':page
         };
         jQuery.ajax({
         	type:'POST',
@@ -169,7 +162,7 @@
 	            	jQuery('#job_posts').append('<div class="no_more_class">No More jobs</div>');
 	            }
 				var canBeLoaded = true; // this parameter allows to initiate the AJAX call only if necessary
-				var   bottomOffset = jQuery(window).height()+20;
+				var   bottomOffset = jQuery(window).height()+10;
 			 
 				jQuery(window).scroll(function(){
 					var data = {

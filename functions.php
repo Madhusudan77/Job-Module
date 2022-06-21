@@ -101,7 +101,7 @@ register_post_type( 'jobs', $args );
 
 function add_theme_caps() {
     // gets the administrator role
-    $admins = get_role( 'administrator' );
+    $admins = get_role( 'client' );
 
     $admins->add_cap( 'edit_job' ); 
     $admins->add_cap( 'edit_jobs' ); 
@@ -377,6 +377,7 @@ function create_form_post() {
     }
     die();
 }
+
 //jobs_listing_shortcode
 function jobs_listing_shortcode($attr){
     if (is_user_logged_in()) {?>
@@ -398,41 +399,26 @@ function jobs_listing_shortcode($attr){
 }
 add_shortcode('jobs_listing_shortcode','jobs_listing_shortcode');
 
+
 //load more ajax function
 add_action('wp_ajax_load_more_action','load_more_action');
 add_action('wp_ajax_nopriv_load_more_action','load_more_action');
 function load_more_action(){
 
-    $jobs_class = $_POST['jobs_class'];
-    
-    if($jobs_class=='contractor'){
-        $user_ID = get_current_user_id(); 
-        $user = new WP_User( $user_ID );
-        if ( !empty( $user->roles ) && is_array( $user->roles ) ) {
-            foreach ( $user->roles as $role ){
+    $user_ID = get_current_user_id(); 
+    $user = new WP_User( $user_ID );
+    if ( !empty( $user->roles ) && is_array( $user->roles ) ) {
+        foreach ( $user->roles as $role ){
+            if($role=='client'){
                 $current_role='contractor';
-            }
-        }
-    }else if($jobs_class=='client'){
-        $user_ID = get_current_user_id(); 
-        $user = new WP_User( $user_ID );
-        if ( !empty( $user->roles ) && is_array( $user->roles ) ) {
-            foreach ( $user->roles as $role ){
+            }else if($role=='contractor'){
                 $current_role='client';
             }
-        }
-    }else if($jobs_class==''){
-        $user_ID = get_current_user_id(); 
-        $user = new WP_User( $user_ID );
-        if ( !empty( $user->roles ) && is_array( $user->roles ) ) {
-            foreach ( $user->roles as $role ){
+            else{
                 $current_role='administrator';
             }
         }
     }
-
-    
-    
     $ids = get_users( array('role' => $current_role ,'fields' => 'ID') );
     $args1 = array(
             'post_type' => 'jobs',
@@ -470,6 +456,8 @@ function load_more_action(){
 }
 
 
+
+//accept and decline
 add_action('wp_ajax_accept_ajax_function','accept_ajax_function');
 add_action('wp_ajax_nopriv_accept_ajax_function','accept_ajax_function');
 function accept_ajax_function(){
@@ -477,15 +465,62 @@ function accept_ajax_function(){
 
     $button_value = $_POST['button_value'];
     $post_id = $_POST['post_id'];
-    echo $button_value;
+    if(!(get_field('notified'))){
+        $message_popped= '<div class="alert alert-warning alert-dismissible" id="alert_message">
+                <a href="#" class="close" id="accept_close" data-dismiss="alert" aria-label="close">&times;</a>
+                <div class="message_box">This is a notification to accept or decline</div>
+            </div>';
+    }else if(get_field('notified')){
+        $message_popped= '';
+    }
+    $author_id = get_post_field( 'post_author', $post_id );
+    $author_email = get_the_author_meta('user_email', $author_id); 
+    $current_user = wp_get_current_user();
+    $user_name = esc_html( $current_user->display_name );
+    $to=$author_email;
+    
+
+
     $post_id = $post_id;
     if($button_value=='Accept'){
         $value = array("accept");
+        $message_popped= '<div class="alert alert-warning alert-dismissible" id="alert_message">
+                <a href="#" class="close" id="accept_close" data-dismiss="alert" aria-label="close">&times;</a>
+                <div class="message_box">Job Accepted</div>
+            </div>';
+            $subject='Job Accepted';
+            $job_status = 'accepted the job';
+        update_field( "field_62ac43ec19e58", 'The job is accepted' ,$post_id );
         update_field( "field_62a9c3af758e4", $value, $post_id );
     }else if($button_value=='Decline'){
         $value = array("");
+        $subject='Job Declined';
+        $job_status = 'declined the job';
+        $message_popped= '<div class="alert alert-warning alert-dismissible" id="alert_message">
+                <a href="#" class="close" id="accept_close" data-dismiss="alert" aria-label="close">&times;</a>
+                <div class="message_box">Job Declined</div>
+            </div>';
          update_field( "field_62a9c3af758e4", $value, $post_id );
     }
+    $returnArr = [$button_value,$message_popped];    
+    echo json_encode($returnArr);
+
+    $body = '<b>'.$user_name.'</b> has <b>'.$job_status.'</b>';
+    wp_mail($to,$subject,$body);
     wp_die();
 }
-   
+
+
+//remove notification
+add_action('wp_ajax_accept_popup_function','accept_popup_function');
+add_action('wp_ajax_nopriv_accept_popup_function','accept_popup_function');
+function accept_popup_function(){
+
+    $post_id = $_POST['post_id'];
+    $value = '';
+    echo 'data removed';
+    update_field('field_62b1363092ffd', 1, $post_id);
+    update_field("field_62ac43ec19e58", $value ,$post_id );
+    wp_die();
+}
+
